@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GravityTracker : MonoBehaviour
@@ -15,14 +13,14 @@ public class GravityTracker : MonoBehaviour
     [SerializeField] bool ApplyGravity = true;
     [SerializeField] Rigidbody LinkedRB;
 
-    public Vector3 GravityVector { get; private set; } = Vector3.zero;
-    public Vector3 Up { get; private set; } = Vector3.zero;
-    public Vector3 Down { get; private set; } = Vector3.zero;
+    public Vector3 GravityVector { get; private set; } = Vector3.down;
+    public Vector3 Up { get; private set; } = Vector3.up;
+    public Vector3 Down { get; private set; } = Vector3.down;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -55,7 +53,7 @@ public class GravityTracker : MonoBehaviour
 
         GravityVector = Vector3.zero;
 
-        foreach(var source in GravityManager.Instance.AllSources)
+        foreach (var source in GravityManager.Instance.AllSources)
         {
             GravityVector += source.GetGravityFor(transform.position);
         }

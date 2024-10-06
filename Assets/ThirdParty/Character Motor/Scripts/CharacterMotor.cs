@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(GravityTracker))]
@@ -10,12 +7,12 @@ public class CharacterMotor : MonoBehaviour, IDamageable
 {
     [SerializeField] protected CharacterMotorConfig Config;
 
-    [SerializeField] protected UnityEvent<bool> OnRunChanged = new UnityEvent<bool> ();
+    [SerializeField] protected UnityEvent<bool> OnRunChanged = new UnityEvent<bool>();
     [SerializeField] protected UnityEvent<Vector3> OnHitGround = new UnityEvent<Vector3>();
     [SerializeField] protected UnityEvent<Vector3> OnBeginJump = new UnityEvent<Vector3>();
     [SerializeField] protected UnityEvent<Vector3, float> OnFootstep = new UnityEvent<Vector3, float>();
 
-    [SerializeField] protected UnityEvent<float, float> OnStaminaChanged = new UnityEvent<float, float> ();
+    [SerializeField] protected UnityEvent<float, float> OnStaminaChanged = new UnityEvent<float, float>();
     [SerializeField] protected UnityEvent<float, float> OnHealthChanged = new UnityEvent<float, float>();
     [SerializeField] protected UnityEvent<float> OnTookDamage = new UnityEvent<float>();
     [SerializeField] protected UnityEvent<CharacterMotor> OnPlayerDied = new UnityEvent<CharacterMotor>();
@@ -47,6 +44,7 @@ public class CharacterMotor : MonoBehaviour, IDamageable
     public SurfaceEffectSource CurrentSurfaceSource { get; protected set; } = null;
     protected float CurrentSurfaceLastTickTime;
 
+    public bool IsDoingCustomMove { get; protected set; } = false;
     public bool IsMovementLocked { get; protected set; } = false;
     public bool IsLookingLocked { get; protected set; } = false;
     public bool IsJumping => IsInJumpingRisePhase || IsInJumpingFallPhase;
@@ -272,6 +270,9 @@ public class CharacterMotor : MonoBehaviour, IDamageable
 
     protected void UpdateMovement(RaycastHit groundCheckResult)
     {
+        if (IsDoingCustomMove)
+            return;
+
         if (DEBUG_OverrideMovement)
             _Input_Move = DEBUG_MovementInput;
 
@@ -390,7 +391,7 @@ public class CharacterMotor : MonoBehaviour, IDamageable
         float lookAheadDistance = Config.Radius + Config.StepCheck_LookAheadRange;
 
         // check if there is a potential step ahead
-        if (Physics.Raycast(lookAheadStartPoint, lookAheadDirection, lookAheadDistance, 
+        if (Physics.Raycast(lookAheadStartPoint, lookAheadDirection, lookAheadDistance,
                             Config.GroundedLayerMask, QueryTriggerInteraction.Ignore))
         {
             lookAheadStartPoint = LinkedRB.position + LocalGravity.Up * Config.StepCheck_MaxStepHeight;
@@ -418,6 +419,9 @@ public class CharacterMotor : MonoBehaviour, IDamageable
 
     protected void UpdateJumping(ref Vector3 movementVector)
     {
+        if (IsDoingCustomMove)
+            return;
+
         // jump requested?
         bool triggeredJumpThisFrame = false;
         if (_Input_Jump && CanCurrentlyJump)
@@ -491,7 +495,7 @@ public class CharacterMotor : MonoBehaviour, IDamageable
                     if (CurrentSurfaceSource != null)
                         jumpVelocity = CurrentSurfaceSource.Effect(jumpVelocity, EEffectableParameter.JumpVelocity);
 
-                    
+
                     movementVector += LocalGravity.Up * (jumpVelocity + Vector3.Dot(movementVector, LocalGravity.Down));
                 }
             }
@@ -500,6 +504,9 @@ public class CharacterMotor : MonoBehaviour, IDamageable
 
     protected void UpdateRunning(RaycastHit groundCheckResult)
     {
+        if (IsDoingCustomMove)
+            return;
+
         // no longer able to run?
         if (!CanCurrentlyRun)
         {
@@ -538,7 +545,7 @@ public class CharacterMotor : MonoBehaviour, IDamageable
     protected void UpdateCrouch()
     {
         // do nothing if either movement or looking are locked
-        if (IsMovementLocked || IsLookingLocked)
+        if (IsMovementLocked || IsLookingLocked || IsDoingCustomMove)
             return;
 
         // not allowed to crouch?
@@ -601,6 +608,11 @@ public class CharacterMotor : MonoBehaviour, IDamageable
     public void SetMovementLock(bool locked)
     {
         IsMovementLocked = locked;
+    }
+
+    public void SetIsDoingCustomMove(bool isDoingCustomMove)
+    {
+        IsDoingCustomMove = isDoingCustomMove;
     }
 
     public void SetLookLock(bool locked)

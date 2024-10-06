@@ -28,8 +28,8 @@ MonoBehaviour:
   Material_Default: {fileID: 13400000, guid: f3a406fa5f713fa409d024f9a8a59457, type: 2}
   Material_Jumping: {fileID: 13400000, guid: 01cd7d9d003e8f143a1f5280e8e09f5c, type: 2}
   Camera_InvertY: 0
-  Camera_HorizontalSensitivity: 10
-  Camera_VerticalSensitivity: 10
+  Camera_HorizontalSensitivity: 20
+  Camera_VerticalSensitivity: 20
   Camera_MinPitch: -75
   Camera_MaxPitch: 75
   Camera_InitialDiscardTime: 0.1
@@ -135,3 +135,11 @@ MonoBehaviour:
   FootstepInterval_Walking: 0.4
   FootstepInterval_Running: 0.2
   MinAirTimeForLandedSound: 0.2
+  MaxStamina: 100
+  StaminaCost_Jumping: 10
+  StaminaCost_Running: 4
+  StaminaRecoveryRate: 10
+  StaminaRecoveryDelay: 0.5
+  MaxHealth: 100
+  HealthRecoveryRate: 10
+  HealthRecoveryDelay: 5
